@@ -28,7 +28,25 @@ export function generateMarkdown(date, data, summary = null, timestamp = null) {
     md += `## 🔥 ${block.category}\n\n`;
     for (const item of block.items.slice(0, 5)) {
       md += `- **${item.title}**  \n`;
-      md += `  来源：${item.source}  \n`;
+      
+      // 标注来源类型
+      const sourceTypeLabel = item.sourceType === 'arxiv' ? 'arXiv（论文摘要）' :
+                             item.sourceType === 'blog' ? '博客' :
+                             item.sourceType === 'news' ? '新闻' : '未知';
+      
+      md += `  来源：${item.source} (${sourceTypeLabel})  \n`;
+      
+      // 如果有摘要，显示摘要
+      const content = item.fullContent || item.snippet;
+      if (content && content.trim().length > 0) {
+        const contentType = item.contentType === 'fulltext' ? '全文' : 'RSS摘要';
+        // 限制摘要长度
+        const preview = content.length > 500 
+          ? content.substring(0, 500).trim() + '...'
+          : content.trim();
+        md += `  摘要（${contentType}）：${preview.replace(/\n/g, ' ')}\n`;
+      }
+      
       md += `  链接：${item.link}\n\n`;
     }
   }

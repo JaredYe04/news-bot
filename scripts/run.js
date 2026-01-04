@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import dayjs from "dayjs";
-import { SOURCES } from "./sources.js";
+import { SOURCES, canFetchFullText, isArxivSource } from "./sources.js";
 import { fetchRSS } from "./fetch-rss.js";
 import { fetchArticleContent } from "./fetch-content.js";
 import { generateMarkdown } from "./generate-md.js";
@@ -34,29 +34,51 @@ for (const block of SOURCES) {
     const feedItems = feed.items || [];
     console.log(`  ✓ Successfully fetched: "${feedTitle}" (${feedItems.length} items)`);
 
-    const selectedItems = feedItems.slice(0, 3);
-    console.log(`  📰 Selected ${selectedItems.length} items:`);
+    // 根据源类型决定抓取数量：arXiv 抓2个（补充型），其他抓3-5个（稳定输出）
+    const isArxiv = isArxivSource(src.name);
+    const maxItems = isArxiv ? 2 : (src.type === 'blog' ? 4 : 3);
+    const selectedItems = feedItems.slice(0, maxItems);
     
-    // 并行抓取文章内容
+    console.log(`  📰 Selected ${selectedItems.length} items (${isArxiv ? 'arXiv补充型' : '稳定输出型'}):`);
+    
+    // 处理每个文章：优先使用RSS摘要，只有白名单才抓全文
     const contentPromises = selectedItems.map(async (i, idx) => {
       const item = {
         title: i.title || 'Untitled',
         link: i.link || '#',
         source: src.name,
-        content: null
+        sourceType: src.type || 'unknown',
+        // 优先使用RSS自带的摘要字段
+        snippet: i.contentSnippet || i.content || i.summary || i.description || "",
+        fullContent: null,  // 只有白名单站点才会有
+        contentType: "rss-snippet"  // 或 "fulltext"
       };
       
       console.log(`    ${idx + 1}. ${item.title}`);
       console.log(`       🔗 ${item.link}`);
       
-      // 抓取文章内容
-      item.content = await fetchArticleContent(item.link);
+      // 提取RSS摘要
+      if (item.snippet) {
+        const preview = item.snippet.substring(0, 100).replace(/\n/g, ' ').trim();
+        console.log(`       📄 RSS摘要 (${item.snippet.length} chars): ${preview}...`);
+      }
       
-      if (item.content) {
-        const preview = item.content.substring(0, 100).replace(/\n/g, ' ');
-        console.log(`       ✓ Content extracted (${item.content.length} chars): ${preview}...`);
+      // 只有白名单站点才尝试抓取全文
+      const shouldFetchFullText = canFetchFullText(item.link);
+      
+      if (shouldFetchFullText) {
+        console.log(`       🔍 白名单站点，尝试抓取全文...`);
+        item.fullContent = await fetchArticleContent(item.link);
+        
+        if (item.fullContent) {
+          item.contentType = "fulltext";
+          const preview = item.fullContent.substring(0, 100).replace(/\n/g, ' ').trim();
+          console.log(`       ✅ 全文提取成功 (${item.fullContent.length} chars): ${preview}...`);
+        } else {
+          console.log(`       ⚠️  全文提取失败，使用RSS摘要`);
+        }
       } else {
-        console.log(`       ⚠️  No content extracted`);
+        console.log(`       ℹ️  非白名单站点，仅使用RSS摘要`);
       }
       
       return item;

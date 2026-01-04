@@ -16,8 +16,8 @@ export async function generateSummary(newsData, timestamp) {
     baseURL: SILICONFLOW_API_URL,
   });
 
-  // 构建新闻内容摘要
-  let newsContent = "今日新闻内容：\n\n";
+  // 构建新闻内容摘要（优先使用RSS摘要，其次全文）
+  let newsContent = "今日科研与技术新闻内容：\n\n";
   
   for (const block of newsData) {
     if (block.items.length === 0) continue;
@@ -27,15 +27,19 @@ export async function generateSummary(newsData, timestamp) {
       newsContent += `\n${idx + 1}. ${item.title} (来源: ${item.source})\n`;
       newsContent += `   链接: ${item.link}\n`;
       
-      // 如果有实际内容，使用内容；否则只使用标题
-      if (item.content && item.content.trim().length > 50) {
+      // 优先使用全文，其次RSS摘要，最后才用标题
+      const content = item.fullContent || item.snippet || "";
+      
+      if (content && content.trim().length > 50) {
         // 限制内容长度，避免超出 token 限制
-        const content = item.content.length > 1000 
-          ? item.content.substring(0, 1000) + '...'
-          : item.content;
-        newsContent += `   内容: ${content}\n`;
+        const trimmedContent = content.length > 800 
+          ? content.substring(0, 800).trim() + '...'
+          : content.trim();
+        
+        const contentType = item.contentType === 'fulltext' ? '全文' : 'RSS摘要';
+        newsContent += `   内容（${contentType}）: ${trimmedContent.replace(/\n/g, ' ')}\n`;
       } else {
-        newsContent += `   (仅标题，无法获取详细内容)\n`;
+        newsContent += `   (仅标题，无详细内容)\n`;
       }
     });
     newsContent += "\n";
