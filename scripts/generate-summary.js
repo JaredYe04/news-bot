@@ -62,7 +62,7 @@ ${newsContent}
     console.log("🤖 Generating summary with LLM...");
     
     const response = await client.chat.completions.create({
-      model: "Qwen/Qwen2.5-7B-Instruct",
+      model: "deepseek-ai/DeepSeek-V3.2",
       messages: [
         {
           role: "user",
