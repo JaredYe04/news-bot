@@ -120,19 +120,20 @@ console.log(`   - 分类数量: ${results.length}`);
 console.log(`   - 文章总数: ${totalItems}`);
 console.log(`${'='.repeat(60)}\n`);
 
-// 生成 LLM 摘要
+// 生成 LLM 摘要（带重试机制）
 let summary = null;
 try {
-  console.log(`🤖 开始生成 LLM 摘要...`);
-  summary = await generateSummary(results, timestamp);
+  console.log(`🤖 开始生成 LLM 摘要（最多重试5次）...`);
+  summary = await generateSummary(results, timestamp, 5);
   if (summary) {
     console.log(`✅ LLM 摘要生成成功 (${summary.length} 字符)`);
     console.log(`\n📝 摘要内容:\n${summary}\n`);
   } else {
-    console.log(`⚠️  LLM 摘要生成失败或返回为空`);
+    console.log(`⚠️  LLM 摘要生成失败，将继续生成不含摘要的报告`);
   }
 } catch (error) {
-  console.error(`❌ Failed to generate summary:`, error);
+  console.error(`❌ 摘要生成过程异常:`, error.message);
+  console.log(`⚠️  将继续生成不含摘要的报告`);
 }
 
 // 生成 Markdown
