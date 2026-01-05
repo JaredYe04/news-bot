@@ -15,7 +15,7 @@ function sleep(ms) {
 async function callLLMAPI(client, prompt, attempt = 1) {
   try {
     const response = await client.chat.completions.create({
-      model: "Qwen/Qwen2.5-7B-Instruct",
+      model: "deepseek-ai/DeepSeek-V3.2",
       messages: [
         {
           role: "user",
