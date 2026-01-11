@@ -2,8 +2,8 @@ name: Daily Research & Tech Digest
 
 on:
   schedule:
-    - cron: "0 1 * * *"   # UTC 01:00 (UTC+8 09:00) - 早上9点
-    - cron: "0 10 * * *"  # UTC 10:00 (UTC+8 18:00) - 晚上6点
+    - cron: "0 0 * * *"   # UTC 00:00 (UTC+8 08:00) - 早上8点
+    - cron: "0 9 * * *"  # UTC 9:00 (UTC+8 17:00) - 晚上5点
   workflow_dispatch:
 
 jobs:
