@@ -1,3 +1,16 @@
+/**
+ * Neutralize GitHub @mentions so issue/PR bodies do not notify users.
+ * Matches @user and @org/team (1–39 chars, alphanumeric/hyphens).
+ * Does not match emails (character before @ is part of an address).
+ */
+export function neutralizeGithubMentions(text) {
+  if (!text) return text;
+  return text.replace(
+    /(^|[^A-Za-z0-9._%+-])@([A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?(?:\/[A-Za-z0-9](?:[A-Za-z0-9._-]{0,37}[A-Za-z0-9])?)?)/g,
+    (match, prefix, name) => `${prefix}\`@\u200B${name}\``
+  );
+}
+
 export function generateMarkdown(date, data, summary = null, timestamp = null, timeSlot = '') {
   let md = `# 🧠 科研 & 技术热点日报\n\n日期：${date}${timeSlot ? ` ${timeSlot}` : ''}\n`;
 
@@ -52,6 +65,5 @@ export function generateMarkdown(date, data, summary = null, timestamp = null, t
   }
 
   md += "---\n_自动生成 · GitHub Actions_\n";
-  return md;
+  return neutralizeGithubMentions(md);
 }
-

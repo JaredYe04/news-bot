@@ -113,7 +113,8 @@ export async function generateSummary(newsData, timestamp, maxRetries = 5) {
 3. 简要的分析或展望
 4. 对于开发者、研究人员、学生等不同角色，给出不同的建议和指导。
 
-要求：语言专业，并且要富含技术性，可以有趣味性，但要符合事实，要用通俗易懂的语言。用中文输出，600-1200字左右，根据实际情况调整。`;
+要求：语言专业，并且要富含技术性，可以有趣味性，但要符合事实，要用通俗易懂的语言。用中文输出，600-1200字左右，根据实际情况调整。
+不要使用 GitHub @username 格式（会触发通知）；需要点名时请写全名或不带 @ 的用户名。`;
 
   const basePromptLength = basePromptPrefix.length + basePromptSuffix.length;
   const MAX_TOTAL_LENGTH = 30000;

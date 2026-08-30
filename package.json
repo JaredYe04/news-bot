@@ -5,7 +5,8 @@
   "type": "module",
   "main": "scripts/run.js",
   "scripts": {
-    "start": "node scripts/run.js"
+    "start": "node scripts/run.js",
+    "test": "node --test scripts/*.test.js"
   },
   "keywords": [
     "rss",
