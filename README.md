@@ -81,7 +81,7 @@ npm start
 5. 值填写：你的硅基流动 API Token
 6. 点击 **Add secret**
 
-配置完成后，工作流会自动使用该 Token 调用 GLM-4.7 模型生成摘要。
+配置完成后，工作流会自动使用该 Token 调用 deepseek-ai/DeepSeek-V3.2 模型生成摘要。
 
 **本地测试时**，需要设置环境变量：
 ```bash
